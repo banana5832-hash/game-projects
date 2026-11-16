@@ -9,6 +9,17 @@
 import argparse, asyncio, os, sys
 from tripo3d import TripoClient, TaskStatus
 
+# 프록시를 거치는 환경(클라우드 세션 등)에서도 SDK가 연결되도록 환경 변수의 프록시를 따르게 한다.
+try:
+    import aiohttp
+    _orig_init = aiohttp.ClientSession.__init__
+    def _init(self, *args, **kw):
+        kw.setdefault("trust_env", True)
+        _orig_init(self, *args, **kw)
+    aiohttp.ClientSession.__init__ = _init
+except ImportError:
+    pass
+
 
 def size_mb(path):
     return os.path.getsize(path) / 1024 / 1024
